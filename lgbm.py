@@ -29,8 +29,8 @@ from functools import partial
 # data load
 data_folder = 'model_data/'
 
-train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr.csv'))
-test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr.csv'))
+train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0410.csv'))
+test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr_0410.csv'))
 
 train_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in train_final_ftr_df.columns]
 test_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in test_final_ftr_df.columns]
@@ -67,15 +67,50 @@ lgb_train_data = lgb.Dataset(X_train, label=y_train)
 #          'metrics' : 'auc',
 #          'verbosity':0}
 
+# |   iter    |  target   | baggin... | featur... | lambda_l1 | lambda_l2 | learni... | max_depth | num_it... | num_le... |
+# |  298      |  0.6741   |  0.6347   |  0.4961   |  6.454    |  0.108    |  0.004814 |  15.61    |  7.859e+0 |  26.43    |
+
+# params = {
+#     'num_leaves': 26,        # num_leaves,       범위(16~1024)
+#     'learning_rate': 0.004814,  # learning_rate,    범위(0.0001~0.1)
+#     'num_iterations': 7859,      # n_estimators,     범위(16~1024)
+#     'bagging_fraction': 0.6347,             # subsample,        범위(0~1)
+#     'feature_fraction': 0.4961,      # colsample_bytree, 범위(0~1)
+#     'lambda_l1': 6.454,            # reg_alpha,        범위(0~10)
+#     'lambda_l2': 0.108,           # reg_lambda,       범위(0~50)
+# }
+
+
+
+# |   iter    |  target   | baggin... | featur... | lambda_l1 | lambda_l2 | learni... | num_it... | num_le... |
+# |  209      |  0.675    |  0.5809   |  0.5207   |  9.459    |  48.93    |  0.05153  |  751.5    |  62.99    |
+
+# {'target': 0.6768743549172733, 'params': {'bagging_fraction': 1.0, 'feature_fraction': 0.713359337126435, 'lambda_l1': 9.225099197025434, 'lambda_l2': 49.43242484634145, 'learning_rate': 0.06242146704630103, 'num_iterations': 774.4107327332043, 'num_leaves': 90.66078188853349}}
+
 params = {
-    'num_leaves': 19,        # num_leaves,       범위(16~1024)
-    'learning_rate': 0.02794,  # learning_rate,    범위(0.0001~0.1)
-    'n_estimators': 724,      # n_estimators,     범위(16~1024)
-    'subsample': 0.8579,             # subsample,        범위(0~1)
-    'colsample_bytree': 0.8448,      # colsample_bytree, 범위(0~1)
-    'reg_alpha': 2.816,            # reg_alpha,        범위(0~10)
-    'reg_lambda': 1.524,           # reg_lambda,       범위(0~50)
+    'boosting_type': 'dart',
+    'n_jobs': 4,
+
+    'bagging_fraction': 1.0,
+    'feature_fraction': 0.713359337126435,
+    'lambda_l1': 9.225099197025434,
+    'lambda_l2': 49.43242484634145,
+    'learning_rate': 0.06242146704630103,
+    'num_iterations': 774,
+    'num_leaves': 91
 }
+
+
+# 0.6833
+# params = {
+#     'num_leaves': 19,        # num_leaves,       범위(16~1024)
+#     'learning_rate': 0.02794,  # learning_rate,    범위(0.0001~0.1)
+#     'n_estimators': 724,      # n_estimators,     범위(16~1024)
+#     'subsample': 0.8579,             # subsample,        범위(0~1)
+#     'colsample_bytree': 0.8448,      # colsample_bytree, 범위(0~1)
+#     'reg_alpha': 2.816,            # reg_alpha,        범위(0~10)
+#     'reg_lambda': 1.524,           # reg_lambda,       범위(0~50)
+# }
 
 bst = lgb.train(params, lgb_train_data,
 #                valid_sets=[lgb_valid_data],
@@ -133,4 +168,4 @@ plt.hist(result_df.winner)
 
  # Output
 
-result_df.to_csv('submission_baseline_0326.csv', index=False)
+result_df.to_csv('submission_baseline_0413.csv', index=False)

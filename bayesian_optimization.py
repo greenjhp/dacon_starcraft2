@@ -28,8 +28,8 @@ from functools import partial
 # data load
 data_folder = 'model_data/'
 
-train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr.csv'))
-test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr.csv'))
+train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0410.csv'))
+test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0410.csv'))
 
 train_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in train_final_ftr_df.columns]
 test_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in test_final_ftr_df.columns]
@@ -79,10 +79,65 @@ _ftr.remove('game_id')
 _ftr.remove('winner')
 
 X_train, y_train = train_final_ftr_df[_ftr], train_final_ftr_df['winner']
+#
+#
+# def lgb_cv(num_iterations, learning_rate, num_leaves,
+#            feature_fraction, bagging_fraction, max_depth,
+#            lambda_l1, lambda_l2,
+#            X=X_train, y=y_train
+#            ):
+#
+#     lgb_train_data = lgb.Dataset(X, label=y)
+#
+#     params = {'boosting_type': 'goss',
+#               # 'early_stopping_round':100,
+#               'objective': 'binary',
+#               'metrics': 'auc'
+#              }
+#
+#     params['num_iterations'] = int(round(num_iterations)),
+#     params['learning_rate'] = learning_rate,
+#     params['num_leaves'] = int(round(num_leaves)),
+#     params['feature_fraction'] = np.clip(feature_fraction, 0, 1),
+#     params['bagging_fraction'] = np.clip(bagging_fraction, 0, 1),
+#     params['max_depth'] = int(round(max_depth)),
+#     params['lambda_l1'] = max(lambda_l1, 0),
+#     params['lambda_l2'] = max(lambda_l2, 0),
+#
+#     print(params)
+#
+#     cv_result = lgb.cv(params, lgb_train_data,
+#                        nfold=5, seed=4321,
+#                        # stratified=True, verbose_eval =200,
+#                        # feval=lgb_f1_score
+#                       )
+#     return max(cv_result['auc-mean'])
+#
+#
+# # 베이지안 최적화 범위 설정
+# lgbBO = BayesianOptimization(
+#     lgb_cv,
+#
+#     {
+#         'num_iterations': (10, 10000),  # num_iterations,     범위(16~1024)
+#         'learning_rate': (0.0001, 0.1),  # learning_rate,    범위(0.0001~0.1)
+#         'num_leaves': (24, 100),
+#         'feature_fraction': (0, 1),
+#         'bagging_fraction': (0, 1),
+#         'max_depth': (5, 20),
+#         'lambda_l1': (0, 10),  # lambda_l1,       범위(0~10)
+#         'lambda_l2': (0, 50),  # lambda_l2,       범위(0~50)
+#      },
+#
+#     random_state=4321                    # 시드 고정
+# )
+# lgbBO.maximize(init_points=5, n_iter=10) # 처음 5회 랜덤 값으로 score 계산 후 30회 최적화
 
 
-
-def lgb_cv(num_leaves, feature_fraction, bagging_fraction, max_depth,
+### cv 수동 구현
+def lgb_cv(num_iterations, learning_rate, num_leaves,
+           feature_fraction, bagging_fraction,
+           lambda_l1, lambda_l2,
            x_data=None, y_data=None, n_splits=5, output='score'): # learning_rate, n_estimators, subsample, colsample_bytree, reg_alpha, reg_lambda,
     score = 0
     kf = KFold(n_splits=n_splits)
@@ -92,22 +147,18 @@ def lgb_cv(num_leaves, feature_fraction, bagging_fraction, max_depth,
         x_valid, y_valid = x_data.iloc[valid_index], y_data[valid_index]
 
         model = lgb.LGBMClassifier(
+            boosting_type='dart',
+            n_jobs=4,
+
+            num_iterations=int(num_iterations),
+            learning_rate=learning_rate,
             num_leaves=int(num_leaves),
-            feature_fraction=feature_fraction,
-            bagging_fraction=bagging_fraction,
-            max_depth=int(max_depth),
-            verbosity=1,
-
-            # num_leaves=int(num_leaves),
-            # learning_rate=learning_rate,
-            # n_estimators=int(n_estimators),
-            # subsample=np.clip(subsample, 0, 1),
-            # colsample_bytree=np.clip(colsample_bytree, 0, 1),
-            # reg_alpha=reg_alpha,
-            # reg_lambda=reg_lambda,
+            feature_fraction=np.clip(feature_fraction, 0, 1),
+            bagging_fraction=np.clip(bagging_fraction, 0, 1),
+            lambda_l1=lambda_l1,
+            lambda_l2=lambda_l2,
         )
-
-        model.fit(x_train, y_train)
+        model.fit(x_train, y_train, verbose=100)
         models.append(model)
 
         pred = model.predict_proba(x_valid)[:, 1]
@@ -125,11 +176,22 @@ func_fixed = partial(lgb_cv, x_data=X_train, y_data=y_train, n_splits=5, output=
 # 베이지안 최적화 범위 설정
 lgbBO = BayesianOptimization(
     func_fixed,
-    {   'num_leaves': (24, 45),
-        'feature_fraction': (0.5, 0.9),
-        'bagging_fraction': (0.8, 1),
-        'max_depth': (5, 9),
-    },
+
+    {
+        'num_iterations': (10, 1000),  # num_iterations,     범위(16~1024)
+        'learning_rate': (0.001, 0.1),  # learning_rate,    범위(0.0001~0.1)
+        'num_leaves': (16, 1024),
+        'feature_fraction': (0.5, 1),
+        'bagging_fraction': (1, 1),
+        'lambda_l1': (0, 10),  # lambda_l1,       범위(0~10)
+        'lambda_l2': (0, 50),  # lambda_l2,       범위(0~50)
+     },
+
+    # {   'num_leaves': (24, 45),
+    #     'feature_fraction': (0.5, 0.9),
+    #     'bagging_fraction': (0.8, 1),
+    #     'max_depth': (5, 9),
+    # },
 
     # {
     #     'num_leaves': (16, 1024),        # num_leaves,       범위(16~1024)
@@ -142,13 +204,13 @@ lgbBO = BayesianOptimization(
     # },
     random_state=4321                    # 시드 고정
 )
-lgbBO.maximize(init_points=5, n_iter=10) # 처음 5회 랜덤 값으로 score 계산 후 30회 최적화
+lgbBO.maximize(init_points=50, n_iter=500) # 처음 5회 랜덤 값으로 score 계산 후 30회 최적화
 #
 # # 이 예제에서는 7개 하이퍼 파라미터에 대해 30회 조정을 시도했습니다.
 # # 다양한 하이퍼 파라미터, 더 많은 iteration을 시도하여 최상의 모델을 얻어보세요!
 # # LightGBM Classifier: https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMClassifier.html
 
-
+print(lgbBO.max)
 
 ## LGBM Model
 

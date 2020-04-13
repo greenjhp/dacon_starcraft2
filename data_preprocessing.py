@@ -26,6 +26,12 @@ output_folder = 'model_data/'
 train_ability_df = pd.read_csv(os.path.join(data_folder,'train_Ability.csv'))
 test_ability_df = pd.read_csv(os.path.join(data_folder,'test_Ability.csv'))
 
+print(train_ability_df.game_id.min())
+print(train_ability_df.game_id.max())
+
+print(test_ability_df.game_id.min())
+print(test_ability_df.game_id.max())
+
 
 # unit supply & cost ftr
 unit_cmp_dict = {'Train':'Train[A-Za-z]*',
@@ -474,6 +480,12 @@ test_camera_homeaway_ftr_df = pd.read_csv(os.path.join(data_folder, 'camera_home
 train_camera_center_moves_ftr_df = pd.read_csv(os.path.join(data_folder, 'camera_center_moves_train.csv'))
 test_camera_center_moves_ftr_df = pd.read_csv(os.path.join(data_folder, 'camera_center_moves_test.csv'))
 
+train_user_activity_ability_df = pd.read_csv(os.path.join(data_folder, 'user_activity_ability_train.csv'))
+test_user_activity_ability_df = pd.read_csv(os.path.join(data_folder, 'user_activity_ability_test.csv'))
+
+camera_moving_stats_train_df = pd.read_csv(os.path.join(data_folder, 'camera_moving_stats_train.csv'))
+camera_moving_stats_test_df = pd.read_csv(os.path.join(data_folder, 'camera_moving_stats_test.csv'))
+
 
 ###### from 상혁님
 
@@ -517,6 +529,9 @@ temp_df = temp_df.merge(train_unit_select_raw_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_camera_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_rightclick_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_camera_homeaway_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(train_camera_center_moves_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(train_user_activity_ability_df, how='left', on='game_id')
+temp_df = temp_df.merge(camera_moving_stats_train_df, how='left', on='game_id')
 
 train_final_ftr_df = temp_df.fillna(0)
 
@@ -525,11 +540,16 @@ train_final_ftr_df['map_1'] = train_final_ftr_df['map_1'].astype('int').astype('
 train_final_ftr_df['species_0'] = train_final_ftr_df['species_0'].astype('int').astype('category')
 train_final_ftr_df['species_1'] = train_final_ftr_df['species_1'].astype('int').astype('category')
 
-print('train_top100_unit_counts_ftr_df:', train_top100_unit_counts_ftr_df.shape)
 print('train_ability_feature_df:', train_ability_feature_df.shape)
+
 print('train_unit_select_raw_ftr_df:', train_unit_select_raw_ftr_df.shape)
 print('train_camera_ftr_df:', train_camera_ftr_df.shape)
 print('train_rightclick_ftr_df:', train_rightclick_ftr_df.shape)
+print('train_camera_homeaway_ftr_df:', train_camera_homeaway_ftr_df.shape)
+print('train_camera_center_moves_ftr_df:', train_camera_center_moves_ftr_df.shape)
+print('train_user_activity_ability_df:', train_user_activity_ability_df.shape)
+print('camera_moving_stats_train_df:', camera_moving_stats_train_df.shape)
+
 print('train_final_ftr_df:', train_final_ftr_df.shape)
 
 
@@ -541,6 +561,9 @@ temp_df = temp_df.merge(test_unit_select_raw_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_camera_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_rightclick_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_camera_homeaway_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(test_camera_center_moves_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(test_user_activity_ability_df, how='left', on='game_id')
+temp_df = temp_df.merge(camera_moving_stats_test_df, how='left', on='game_id')
 
 test_final_ftr_df = temp_df.fillna(0)
 
@@ -549,17 +572,22 @@ test_final_ftr_df['map_1'] = test_final_ftr_df['map_1'].astype('int').astype('ca
 test_final_ftr_df['species_0'] = test_final_ftr_df['species_0'].astype('int').astype('category')
 test_final_ftr_df['species_1'] = test_final_ftr_df['species_1'].astype('int').astype('category')
 
-print('test_top100_unit_counts_ftr_df:', train_top100_unit_counts_ftr_df.shape)
-print('test_ability_feature_df:', train_ability_feature_df.shape)
-print('test_unit_select_raw_ftr_df:', train_unit_select_raw_ftr_df.shape)
-print('test_camera_ftr_df:', train_camera_ftr_df.shape)
-print('test_rightclick_ftr_df:', train_rightclick_ftr_df.shape)
-print('test_final_ftr_df:', train_final_ftr_df.shape)
+print('test_ability_feature_df:', test_ability_feature_df.shape)
+
+print('test_unit_select_raw_ftr_df:', test_unit_select_raw_ftr_df.shape)
+print('test_camera_ftr_df:', test_camera_ftr_df.shape)
+print('test_rightclick_ftr_df:', test_rightclick_ftr_df.shape)
+print('test_camera_homeaway_ftr_df:', test_camera_homeaway_ftr_df.shape)
+print('test_camera_center_moves_ftr_df:', test_camera_center_moves_ftr_df.shape)
+print('test_user_activity_ability_df:', test_user_activity_ability_df.shape)
+print('camera_moving_stats_test_df:', camera_moving_stats_test_df.shape)
+
+print('test_final_ftr_df:', test_final_ftr_df.shape)
 
 
 ## output
-train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0327.csv'))
-test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0327.csv'))
+train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0410.csv'))
+test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0410.csv'))
 
 
 # del train_ability_df
