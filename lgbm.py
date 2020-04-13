@@ -29,8 +29,8 @@ from functools import partial
 # data load
 data_folder = 'model_data/'
 
-train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0410.csv'))
-test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr_0410.csv'))
+train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0413.csv'))
+test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr_0413.csv'))
 
 train_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in train_final_ftr_df.columns]
 test_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in test_final_ftr_df.columns]
@@ -90,6 +90,8 @@ lgb_train_data = lgb.Dataset(X_train, label=y_train)
 params = {
     'boosting_type': 'dart',
     'n_jobs': 4,
+    'objective': 'binary',
+    'metrics': 'auc',
 
     'bagging_fraction': 1.0,
     'feature_fraction': 0.713359337126435,
@@ -168,4 +170,4 @@ plt.hist(result_df.winner)
 
  # Output
 
-result_df.to_csv('submission_baseline_0413.csv', index=False)
+result_df.to_csv('submission_baseline_0413_2.csv', index=False)

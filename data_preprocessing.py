@@ -486,6 +486,8 @@ test_user_activity_ability_df = pd.read_csv(os.path.join(data_folder, 'user_acti
 camera_moving_stats_train_df = pd.read_csv(os.path.join(data_folder, 'camera_moving_stats_train.csv'))
 camera_moving_stats_test_df = pd.read_csv(os.path.join(data_folder, 'camera_moving_stats_test.csv'))
 
+attack_units_cnt_train_df = pd.read_csv(os.path.join(data_folder, 'attack_units_cnt_train.csv'))
+attack_units_cnt_test_df = pd.read_csv(os.path.join(data_folder, 'attack_units_cnt_test.csv'))
 
 ###### from 상혁님
 
@@ -532,6 +534,7 @@ temp_df = temp_df.merge(train_camera_homeaway_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_camera_center_moves_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_user_activity_ability_df, how='left', on='game_id')
 temp_df = temp_df.merge(camera_moving_stats_train_df, how='left', on='game_id')
+temp_df = temp_df.merge(attack_units_cnt_train_df, how='left', on='game_id')
 
 train_final_ftr_df = temp_df.fillna(0)
 
@@ -549,9 +552,11 @@ print('train_camera_homeaway_ftr_df:', train_camera_homeaway_ftr_df.shape)
 print('train_camera_center_moves_ftr_df:', train_camera_center_moves_ftr_df.shape)
 print('train_user_activity_ability_df:', train_user_activity_ability_df.shape)
 print('camera_moving_stats_train_df:', camera_moving_stats_train_df.shape)
+print('attack_units_cnt_train_df:', attack_units_cnt_train_df.shape)
 
 print('train_final_ftr_df:', train_final_ftr_df.shape)
 
+print(train_final_ftr_df.columns)
 
 ## test
 # temp_df = test_top100_unit_counts_ftr_df.merge(test_ability_feature_df, how='left', on='game_id')
@@ -564,6 +569,7 @@ temp_df = temp_df.merge(test_camera_homeaway_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_camera_center_moves_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_user_activity_ability_df, how='left', on='game_id')
 temp_df = temp_df.merge(camera_moving_stats_test_df, how='left', on='game_id')
+temp_df = temp_df.merge(attack_units_cnt_test_df, how='left', on='game_id')
 
 test_final_ftr_df = temp_df.fillna(0)
 
@@ -581,13 +587,14 @@ print('test_camera_homeaway_ftr_df:', test_camera_homeaway_ftr_df.shape)
 print('test_camera_center_moves_ftr_df:', test_camera_center_moves_ftr_df.shape)
 print('test_user_activity_ability_df:', test_user_activity_ability_df.shape)
 print('camera_moving_stats_test_df:', camera_moving_stats_test_df.shape)
+print('attack_units_cnt_test_df:', attack_units_cnt_test_df.shape)
 
 print('test_final_ftr_df:', test_final_ftr_df.shape)
 
 
 ## output
-train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0410.csv'))
-test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0410.csv'))
+train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0413.csv'))
+test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0413.csv'))
 
 
 # del train_ability_df
