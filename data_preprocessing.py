@@ -177,6 +177,24 @@ map_ftr_df = map_ftr_df[['game_id', 'map']]
 train_ability_feature_df = train_ability_feature_df.merge(map_ftr_df, how='left', on=['game_id'])
 test_ability_feature_df = test_ability_feature_df.merge(map_ftr_df, how='left', on=['game_id'])
 
+# 플레이어별 종족 one hot encoding
+def map_one_hot_encoding(df: pd.DataFrame):
+    df['map_0'] = df['map'].map(lambda x: 1 if x == 0 else 0)
+    df['map_1'] = df['map'].map(lambda x: 1 if x == 1 else 0)
+    df['map_2'] = df['map'].map(lambda x: 1 if x == 2 else 0)
+    df['map_3'] = df['map'].map(lambda x: 1 if x == 3 else 0)
+    df['map_4'] = df['map'].map(lambda x: 1 if x == 4 else 0)
+    df['map_5'] = df['map'].map(lambda x: 1 if x == 5 else 0)
+    df['map_6'] = df['map'].map(lambda x: 1 if x == 6 else 0)
+
+    result_df = df.drop(['map'], axis='columns')
+
+    return result_df
+
+train_ability_feature_df = map_one_hot_encoding(train_ability_feature_df)
+test_ability_feature_df = map_one_hot_encoding(test_ability_feature_df)
+
+
 
 # 0, 1 플레이어 합쳐서 게임 당 한 줄로
 def player_flattner(df: pd.DataFrame):
@@ -190,7 +208,7 @@ def player_flattner(df: pd.DataFrame):
     temp_df_0 = temp_df.loc[temp_df.player == 0].drop('player', axis='columns')
     temp_df_1 = temp_df.loc[temp_df.player == 1].drop('player', axis='columns')
 
-    key_col_list = ['game_id','winner','duration']
+    key_col_list = ['game_id','winner','duration','map_0','map_1','map_2','map_3','map_4','map_5','map_6']
     if data_set_type == 'test':
         key_col_list.remove('winner')
     
@@ -224,37 +242,37 @@ test_ability_feature_df = player_flattner(test_ability_feature_df)
 # test_ability_feature_df = test_ability_feature_df[['game_id','duration','species_0','species_1','train_ratio','build_ratio','upgrade_ratio','attack_ratio','supply_ratio','minerals_ratio','gas_ratio']]
 
 
-# 플레이어별 종족 one hot encoding
-# def species_one_hot_encoding(df: pd.DataFrame):
-#     df['species0_T'] = df['species_0'].map(lambda x: 1 if x=='T' else 0)
-#     df['species0_P'] = df['species_0'].map(lambda x: 1 if x=='P' else 0)
-#     df['species0_Z'] = df['species_0'].map(lambda x: 1 if x=='Z' else 0)
-#     df['species1_T'] = df['species_1'].map(lambda x: 1 if x=='T' else 0)
-#     df['species1_P'] = df['species_1'].map(lambda x: 1 if x=='P' else 0)
-#     df['species1_Z'] = df['species_1'].map(lambda x: 1 if x=='Z' else 0)
+# # 플레이어별 종족 label encoding
+# def species_label_encoding(df: pd.DataFrame):
+#     df['species_0'] = df['species_0'].map(lambda x: 1 if x=='T' else (2 if x=='P' else (3 if x=='Z' else 0)))
+#     df['species_1'] = df['species_1'].map(lambda x: 1 if x=='T' else (2 if x=='P' else (3 if x=='Z' else 0)))
 #
-#     ability_feature_final_df = df.drop(['species_0', 'species_1'], axis='columns')
+#     ability_feature_final_df = df
 #
 #     return ability_feature_final_df
 #
-# train_ability_feature_df = species_one_hot_encoding(train_ability_feature_df)
-# train_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']] = train_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']].astype('category')
-#
-# test_ability_feature_df = species_one_hot_encoding(test_ability_feature_df)
-# test_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']] = test_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']].astype('category')
+# train_ability_feature_df = species_label_encoding(train_ability_feature_df)
+# test_ability_feature_df = species_label_encoding(test_ability_feature_df)
 
 
-# 플레이어별 종족 label encoding
-def species_label_encoding(df: pd.DataFrame):
-    df['species_0'] = df['species_0'].map(lambda x: 1 if x=='T' else (2 if x=='P' else (3 if x=='Z' else 0)))
-    df['species_1'] = df['species_1'].map(lambda x: 1 if x=='T' else (2 if x=='P' else (3 if x=='Z' else 0)))
+# map one hot encoding
+def species_one_hot_encoding(df: pd.DataFrame):
+    df['species0_T'] = df['species_0'].map(lambda x: 1 if x=='T' else 0)
+    df['species0_P'] = df['species_0'].map(lambda x: 1 if x=='P' else 0)
+    df['species0_Z'] = df['species_0'].map(lambda x: 1 if x=='Z' else 0)
+    df['species1_T'] = df['species_1'].map(lambda x: 1 if x=='T' else 0)
+    df['species1_P'] = df['species_1'].map(lambda x: 1 if x=='P' else 0)
+    df['species1_Z'] = df['species_1'].map(lambda x: 1 if x=='Z' else 0)
 
-    ability_feature_final_df = df
+    ability_feature_final_df = df.drop(['species_0', 'species_1'], axis='columns')
 
     return ability_feature_final_df
 
-train_ability_feature_df = species_label_encoding(train_ability_feature_df)
-test_ability_feature_df = species_label_encoding(test_ability_feature_df)
+train_ability_feature_df = species_one_hot_encoding(train_ability_feature_df)
+# train_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']] = train_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']].astype('category')
+
+test_ability_feature_df = species_one_hot_encoding(test_ability_feature_df)
+# test_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']] = test_ability_feature_df[['species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z']].astype('category')
 
 
 
@@ -521,13 +539,25 @@ test_rightclick_ftr_df = pd.read_csv(os.path.join(data_folder, 'test_Rightclick_
 # test_rightclick_ftr_df = test_rightclick_ftr_df.drop(['player0_click_near0','player0_click_near1','player1_click_near1','player1_click_near0'], axis='columns')
 
 
+# 교전장소 - camera
+# train_dist_from_battle_field_df = pd.read_csv(os.path.join(data_folder, 'train_dist_from_battle_field.csv'))
+# test_dist_from_battle_field_df = pd.read_csv(os.path.join(data_folder, 'test_dist_from_battle_field.csv'))
+
+# 교전장소 - right click
+# train_dist_from_battle_field_by_rc_df = pd.read_csv(os.path.join(data_folder, 'train_dist_from_battle_field_by_rc.csv'))
+# test_dist_from_battle_field_by_rc_df = pd.read_csv(os.path.join(data_folder, 'test_dist_from_battle_field_by_rc.csv'))
+
+# 교전장소 - total
+train_dist_from_battle_field_by_total_df = pd.read_csv(os.path.join(data_folder, 'train_dist_from_battle_field_by_total.csv'))
+test_dist_from_battle_field_by_total_df = pd.read_csv(os.path.join(data_folder, 'test_dist_from_battle_field_by_total.csv'))
+
 
 # 파트합체
 ## train
 # temp_df = train_top100_unit_counts_ftr_df.merge(train_ability_feature_df, how='left', on='game_id')
-temp_df = train_ability_feature_df
+temp_df = train_unit_select_raw_ftr_df
 
-temp_df = temp_df.merge(train_unit_select_raw_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(train_ability_feature_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_camera_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_rightclick_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(train_camera_homeaway_ftr_df, how='left', on='game_id')
@@ -535,13 +565,14 @@ temp_df = temp_df.merge(train_camera_center_moves_ftr_df, how='left', on='game_i
 temp_df = temp_df.merge(train_user_activity_ability_df, how='left', on='game_id')
 temp_df = temp_df.merge(camera_moving_stats_train_df, how='left', on='game_id')
 temp_df = temp_df.merge(attack_units_cnt_train_df, how='left', on='game_id')
+temp_df = temp_df.merge(train_dist_from_battle_field_by_total_df, how='left', on='game_id')
 
 train_final_ftr_df = temp_df.fillna(0)
 
-train_final_ftr_df['map_0'] = train_final_ftr_df['map_0'].astype('int').astype('category')
-train_final_ftr_df['map_1'] = train_final_ftr_df['map_1'].astype('int').astype('category')
-train_final_ftr_df['species_0'] = train_final_ftr_df['species_0'].astype('int').astype('category')
-train_final_ftr_df['species_1'] = train_final_ftr_df['species_1'].astype('int').astype('category')
+# train_final_ftr_df['map_0'] = train_final_ftr_df['map_0'].astype('int').astype('category')
+# train_final_ftr_df['map_1'] = train_final_ftr_df['map_1'].astype('int').astype('category')
+# train_final_ftr_df['species_0'] = train_final_ftr_df['species_0'].astype('int').astype('category')
+# train_final_ftr_df['species_1'] = train_final_ftr_df['species_1'].astype('int').astype('category')
 
 print('train_ability_feature_df:', train_ability_feature_df.shape)
 
@@ -556,13 +587,12 @@ print('attack_units_cnt_train_df:', attack_units_cnt_train_df.shape)
 
 print('train_final_ftr_df:', train_final_ftr_df.shape)
 
-print(train_final_ftr_df.columns)
 
 ## test
 # temp_df = test_top100_unit_counts_ftr_df.merge(test_ability_feature_df, how='left', on='game_id')
-temp_df = test_ability_feature_df
+temp_df = test_unit_select_raw_ftr_df
 
-temp_df = temp_df.merge(test_unit_select_raw_ftr_df, how='left', on='game_id')
+temp_df = temp_df.merge(test_ability_feature_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_camera_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_rightclick_ftr_df, how='left', on='game_id')
 temp_df = temp_df.merge(test_camera_homeaway_ftr_df, how='left', on='game_id')
@@ -570,13 +600,14 @@ temp_df = temp_df.merge(test_camera_center_moves_ftr_df, how='left', on='game_id
 temp_df = temp_df.merge(test_user_activity_ability_df, how='left', on='game_id')
 temp_df = temp_df.merge(camera_moving_stats_test_df, how='left', on='game_id')
 temp_df = temp_df.merge(attack_units_cnt_test_df, how='left', on='game_id')
+temp_df = temp_df.merge(test_dist_from_battle_field_by_total_df, how='left', on='game_id')
 
 test_final_ftr_df = temp_df.fillna(0)
 
-test_final_ftr_df['map_0'] = test_final_ftr_df['map_0'].astype('int').astype('category')
-test_final_ftr_df['map_1'] = test_final_ftr_df['map_1'].astype('int').astype('category')
-test_final_ftr_df['species_0'] = test_final_ftr_df['species_0'].astype('int').astype('category')
-test_final_ftr_df['species_1'] = test_final_ftr_df['species_1'].astype('int').astype('category')
+# test_final_ftr_df['map_0'] = test_final_ftr_df['map_0'].astype('int').astype('category')
+# test_final_ftr_df['map_1'] = test_final_ftr_df['map_1'].astype('int').astype('category')
+# test_final_ftr_df['species_0'] = test_final_ftr_df['species_0'].astype('int').astype('category')
+# test_final_ftr_df['species_1'] = test_final_ftr_df['species_1'].astype('int').astype('category')
 
 print('test_ability_feature_df:', test_ability_feature_df.shape)
 
@@ -592,9 +623,160 @@ print('attack_units_cnt_test_df:', attack_units_cnt_test_df.shape)
 print('test_final_ftr_df:', test_final_ftr_df.shape)
 
 
+## action 통합 컬럼 만들기
+train_final_ftr_df['p0_actions'] = train_final_ftr_df.apply(lambda x: x['p0_actions_0'] 
+                                                                      + x['p0_actions_1']
+                                                                      + x['p0_actions_2']
+                                                                      + x['p0_actions_3'] 
+                                                                      + x['p0_actions_4'] 
+                                                                      + x['p0_actions_5'] 
+                                                                      + x['p0_actions_6'] 
+                                                                      + x['p0_actions_7'] 
+                                                                      + x['p0_actions_8'] 
+                                                                      + x['p0_actions_9'], axis='columns')
+
+train_final_ftr_df['p1_actions'] = train_final_ftr_df.apply(lambda x: x['p1_actions_0'] 
+                                                                      + x['p1_actions_1']
+                                                                      + x['p1_actions_2']
+                                                                      + x['p1_actions_3'] 
+                                                                      + x['p1_actions_4'] 
+                                                                      + x['p1_actions_5'] 
+                                                                      + x['p1_actions_6'] 
+                                                                      + x['p1_actions_7'] 
+                                                                      + x['p1_actions_8'] 
+                                                                      + x['p1_actions_9'], axis='columns')
+
+test_final_ftr_df['p0_actions'] = test_final_ftr_df.apply(lambda x: x['p0_actions_0'] 
+                                                                      + x['p0_actions_1']
+                                                                      + x['p0_actions_2']
+                                                                      + x['p0_actions_3']
+                                                                      + x['p0_actions_4'] 
+                                                                      + x['p0_actions_5'] 
+                                                                      + x['p0_actions_6'] 
+                                                                      + x['p0_actions_7'] 
+                                                                      + x['p0_actions_8'] 
+                                                                      + x['p0_actions_9'], axis='columns')
+
+test_final_ftr_df['p1_actions'] = test_final_ftr_df.apply(lambda x: x['p1_actions_0'] 
+                                                                      + x['p1_actions_1']
+                                                                      + x['p1_actions_2']
+                                                                      + x['p1_actions_3']
+                                                                      + x['p1_actions_4'] 
+                                                                      + x['p1_actions_5'] 
+                                                                      + x['p1_actions_6'] 
+                                                                      + x['p1_actions_7'] 
+                                                                      + x['p1_actions_8'] 
+                                                                      + x['p1_actions_9'], axis='columns')
+
+
+## 분단위 컬럼 빼기
+drop_column_list = ['p0_center_0',
+ 'p0_center_1',
+ 'p0_center_2',
+ 'p0_center_3',
+ 'p0_center_4',
+ 'p0_center_5',
+ 'p0_center_6',
+ 'p0_center_7',
+ 'p0_center_8',
+ 'p0_center_9',
+ 'p1_center_0',
+ 'p1_center_1',
+ 'p1_center_2',
+ 'p1_center_3',
+ 'p1_center_4',
+ 'p1_center_5',
+ 'p1_center_6',
+ 'p1_center_7',
+ 'p1_center_8',
+ 'p1_center_9',
+'p0_actions_0',
+ 'p0_actions_1',
+ 'p0_actions_2',
+ 'p0_actions_3',
+ 'p0_actions_4',
+ 'p0_actions_5',
+ 'p0_actions_6',
+ 'p0_actions_7',
+ 'p0_actions_8',
+ 'p0_actions_9',
+ 'p1_actions_0',
+ 'p1_actions_1',
+ 'p1_actions_2',
+ 'p1_actions_3',
+ 'p1_actions_4',
+ 'p1_actions_5',
+ 'p1_actions_6',
+ 'p1_actions_7',
+ 'p1_actions_8',
+ 'p1_actions_9',
+'cam_moving_p0_mean0',
+ 'cam_moving_p0_mean1',
+ 'cam_moving_p0_mean2',
+ 'cam_moving_p0_mean3',
+ 'cam_moving_p0_mean4',
+ 'cam_moving_p0_mean5',
+ 'cam_moving_p0_mean6',
+ 'cam_moving_p0_mean7',
+ 'cam_moving_p0_mean8',
+ 'cam_moving_p0_mean9',
+ 'cam_moving_p1_mean0',
+ 'cam_moving_p1_mean1',
+ 'cam_moving_p1_mean2',
+ 'cam_moving_p1_mean3',
+ 'cam_moving_p1_mean4',
+ 'cam_moving_p1_mean5',
+ 'cam_moving_p1_mean6',
+ 'cam_moving_p1_mean7',
+ 'cam_moving_p1_mean8',
+ 'cam_moving_p1_mean9',
+ 'cam_moving_p0_std0',
+ 'cam_moving_p0_std1',
+ 'cam_moving_p0_std2',
+ 'cam_moving_p0_std3',
+ 'cam_moving_p0_std4',
+ 'cam_moving_p0_std5',
+ 'cam_moving_p0_std6',
+ 'cam_moving_p0_std7',
+ 'cam_moving_p0_std8',
+ 'cam_moving_p0_std9',
+ 'cam_moving_p1_std0',
+ 'cam_moving_p1_std1',
+ 'cam_moving_p1_std2',
+ 'cam_moving_p1_std3',
+ 'cam_moving_p1_std4',
+ 'cam_moving_p1_std5',
+ 'cam_moving_p1_std6',
+ 'cam_moving_p1_std7',
+ 'cam_moving_p1_std8',
+ 'cam_moving_p1_std9',
+'attack_units_p0_s5',
+ 'attack_units_p0_s6',
+ 'attack_units_p0_s7',
+ 'attack_units_p0_s8',
+ 'attack_units_p0_s9',
+ 'attack_units_p0_s10',
+ 'attack_units_p0_s11',
+ 'attack_units_p1_s5',
+ 'attack_units_p1_s6',
+ 'attack_units_p1_s7',
+ 'attack_units_p1_s8',
+ 'attack_units_p1_s9',
+ 'attack_units_p1_s10',
+ 'attack_units_p1_s11']
+
+train_final_ftr_df = train_final_ftr_df.drop(drop_column_list, axis='columns')
+test_final_ftr_df = test_final_ftr_df.drop(drop_column_list, axis='columns')
+
+
+# # 중복된 map 컬럼 하나 빼기
+# train_final_ftr_df = train_final_ftr_df.drop(['map_1'], axis='columns')
+# test_final_ftr_df = test_final_ftr_df.drop(['map_1'], axis='columns')
+
+
 ## output
-train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0413.csv'))
-test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0413.csv'))
+train_final_ftr_df.to_csv(os.path.join(output_folder,'train_final_ftr_0414_4.csv'), index=False)
+test_final_ftr_df.to_csv(os.path.join(output_folder,'test_final_ftr_0414_4.csv'), index=False)
 
 
 # del train_ability_df

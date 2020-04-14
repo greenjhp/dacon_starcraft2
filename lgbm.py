@@ -29,21 +29,21 @@ from functools import partial
 # data load
 data_folder = 'model_data/'
 
-train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0413.csv'))
-test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr_0413.csv'))
+train_final_ftr_df = pd.read_csv(os.path.join(data_folder,'train_final_ftr_0414_4.csv'))
+test_final_ftr_df = pd.read_csv(os.path.join(data_folder,'test_final_ftr_0414_4.csv'))
 
 train_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in train_final_ftr_df.columns]
 test_final_ftr_df.columns = ["".join (c if c.isalnum() else "_" for c in str(x)) for x in test_final_ftr_df.columns]
 
-train_final_ftr_df['map_0'] = train_final_ftr_df['map_0'].astype('int').astype('category')
-train_final_ftr_df['map_1'] = train_final_ftr_df['map_1'].astype('int').astype('category')
-train_final_ftr_df['species_0'] = train_final_ftr_df['species_0'].astype('int').astype('category')
-train_final_ftr_df['species_1'] = train_final_ftr_df['species_1'].astype('int').astype('category')
-
-test_final_ftr_df['map_0'] = test_final_ftr_df['map_0'].astype('int').astype('category')
-test_final_ftr_df['map_1'] = test_final_ftr_df['map_1'].astype('int').astype('category')
-test_final_ftr_df['species_0'] = test_final_ftr_df['species_0'].astype('int').astype('category')
-test_final_ftr_df['species_1'] = test_final_ftr_df['species_1'].astype('int').astype('category')
+# train_final_ftr_df['map_0'] = train_final_ftr_df['map_0'].astype('int').astype('category')
+# train_final_ftr_df['map_1'] = train_final_ftr_df['map_1'].astype('int').astype('category')
+# train_final_ftr_df['species_0'] = train_final_ftr_df['species_0'].astype('int').astype('category')
+# train_final_ftr_df['species_1'] = train_final_ftr_df['species_1'].astype('int').astype('category')
+#
+# test_final_ftr_df['map_0'] = test_final_ftr_df['map_0'].astype('int').astype('category')
+# test_final_ftr_df['map_1'] = test_final_ftr_df['map_1'].astype('int').astype('category')
+# test_final_ftr_df['species_0'] = test_final_ftr_df['species_0'].astype('int').astype('category')
+# test_final_ftr_df['species_1'] = test_final_ftr_df['species_1'].astype('int').astype('category')
 
 
 
@@ -87,20 +87,52 @@ lgb_train_data = lgb.Dataset(X_train, label=y_train)
 
 # {'target': 0.6768743549172733, 'params': {'bagging_fraction': 1.0, 'feature_fraction': 0.713359337126435, 'lambda_l1': 9.225099197025434, 'lambda_l2': 49.43242484634145, 'learning_rate': 0.06242146704630103, 'num_iterations': 774.4107327332043, 'num_leaves': 90.66078188853349}}
 
-params = {
-    'boosting_type': 'dart',
-    'n_jobs': 4,
-    'objective': 'binary',
-    'metrics': 'auc',
+# # 0413
+# params = {
+#     'boosting_type': 'dart',
+#     'n_jobs': 4,
+#     'objective': 'binary',
+#     'metrics': 'auc',
+#
+#     'bagging_fraction': 1.0,
+#     'feature_fraction': 0.713359337126435,
+#     'lambda_l1': 9.225099197025434,
+#     'lambda_l2': 49.43242484634145,
+#     'learning_rate': 0.06242146704630103,
+#     'num_iterations': 774,
+#     'num_leaves': 91
+# }
 
-    'bagging_fraction': 1.0,
-    'feature_fraction': 0.713359337126435,
-    'lambda_l1': 9.225099197025434,
-    'lambda_l2': 49.43242484634145,
-    'learning_rate': 0.06242146704630103,
-    'num_iterations': 774,
-    'num_leaves': 91
-}
+# # 0414_2
+# params = {'boosting_type': 'dart',
+#           'n_jobs': 4,
+#           'objective': 'binary',
+#           'metrics': 'auc',
+#
+#           'bagging_fraction': 1.0,
+#           'feature_fraction': 0.5868183544272747,
+#           'lambda_l1': 2.27974900764249,
+#           'lambda_l2': 47.847072146440915,
+#           'learning_rate': 0.053310375663659613,
+#           'min_data_in_leaf': 30,
+#           'num_iterations': 934,
+#           'num_leaves': 254}
+
+# 0414_3
+params = {'boosting_type': 'dart',
+          'n_jobs': 4,
+          'objective': 'binary',
+          'metrics': 'auc',
+
+# 'bagging_fraction': 0.9339555404817057,
+'bagging_fraction': 1,
+'feature_fraction': 0.9852242346443292,
+'lambda_l1': 2.9659344859213888,
+'lambda_l2': 46.14165176383672,
+'learning_rate': 0.06458834869249273,
+'min_data_in_leaf': 13,
+'num_iterations': 990,
+'num_leaves': 20}
 
 
 # 0.6833
@@ -119,8 +151,8 @@ bst = lgb.train(params, lgb_train_data,
 #                num_boost_round = 10000,
 #                early_stopping_rounds=500,
 #                categorical_feature=['map_0','map_1','species0_T','species0_P','species0_Z','species1_T','species1_P','species1_Z'],
-               categorical_feature=['map_0','map_1','species_0','species_1'],
-               verbose_eval=100)
+#                categorical_feature=['map_0','map_1','species_0','species_1'],
+               verbose_eval=50)
 
 
 
@@ -170,4 +202,4 @@ plt.hist(result_df.winner)
 
  # Output
 
-result_df.to_csv('submission_baseline_0413_2.csv', index=False)
+result_df.to_csv('submission_baseline_0414_4.csv', index=False)
