@@ -5,11 +5,11 @@
 ### 2020.03.01 ~ 2020.04.15 17:59
 ### https://dacon.io/competitions/official/235583/overview/
 
-eda	- ipynb for eda
-ftrgen - feature generating logic
-model_data - merge each feature to input into model
-output_log - bayesian optimization logs
-submission - submission files
-bayesian_optimization.py - bayesian optimization script
-data_preprocessing.py	- from ftrgen to model_data
+eda	- ipynb for eda  
+ftrgen - feature generating logic  
+model_data - merge each feature to input into model  
+output_log - bayesian optimization logs  
+submission - submission files  
+bayesian_optimization.py - bayesian optimization script  
+data_preprocessing.py	- from ftrgen to model_data  
 lgbm.py - light gbm model
