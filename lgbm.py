@@ -202,4 +202,4 @@ plt.hist(result_df.winner)
 
  # Output
 
-result_df.to_csv('submission_baseline_0414_4.csv', index=False)
+result_df.to_csv('submission/submission_0414_4.csv', index=False)
